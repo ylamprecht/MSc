@@ -1,0 +1,147 @@
+#!/bin/bash
+
+#PBS -N CVD781
+#PBS -l walltime=60:00:00
+#PBS -l select=1:ncpus=24:mpiprocs=24
+#PBS -P HEAL1360
+#PBS -q smp
+#PBS -e /mnt/lustre/users/ylamprecht/Hons_project/CVD781/CVD781.err
+#PBS -o /mnt/lustre/users/ylamprecht/Hons_project/CVD781/CVD781.out
+#PBS -M 24952818@sun.ac.za
+#PBS -m abe
+
+# Exit immediately if a step exits with a non-zero status
+set -e
+
+cd /mnt/lustre/users/ylamprecht/Hons_project
+
+# Define paths
+patient_nr=CVD781
+sample=/mnt/lustre/groups/HEAL1360/OurDatasets/DP_WGS_090625/${patient_nr}
+out_dir=/mnt/lustre/users/ylamprecht/Hons_project/${patient_nr}
+
+# Log file
+log_file=${out_dir}/variant_calling.log
+
+log() {
+    echo "$(date +'%Y-%m-%d %H:%M:%S') - $1" >> ${log_file}
+}
+
+# FastQC
+log "Starting FastQC"
+module purge
+module load chpc/BIOMODULES
+module load fastqc/0.12.1
+mkdir -p ${out_dir}/FastQC
+fastqc ${sample}/*fq.gz -o ${out_dir}/FastQC --noextract
+log "Finished FastQC"
+
+# MultiQC
+log "Starting MultiQC"
+module purge
+cd ${out_dir}/FastQC
+module load chpc/BIOMODULES
+module load python/3.6.3
+multiqc .
+log "Finished MultiQC"
+
+cd /mnt/lustre/users/ylamprecht/Hons_project
+
+# BWA
+log "Starting BWA"
+module purge
+module load chpc/BIOMODULES
+module load bwa/0.7.17
+cat ${sample}/*_1.fq.gz > ${out_dir}/${patient_nr}_combined_1.fq.gz
+cat ${sample}/*_2.fq.gz > ${out_dir}/${patient_nr}_combined_2.fq.gz
+bwa mem -M -t 24 hg38idx ${out_dir}/${patient_nr}_combined_1.fq.gz ${out_dir}/${patient_nr}_combined_2.fq.gz > ${out_dir}/${patient_nr}.sam
+log "Finished BWA"
+
+# Create BAM
+log "Starting SAM to BAM conversion"
+module purge
+module load chpc/BIOMODULES
+module load samtools/1.20
+samtools view -bS ${out_dir}/${patient_nr}.sam > ${out_dir}/${patient_nr}.bam
+log "Finished SAM to BAM conversion"
+
+# Add/Replace Read Groups
+log "Starting AddOrReplaceReadGroups"
+module purge
+module load chpc/BIOMODULES
+module load gatk/4.2.6.1
+gatk AddOrReplaceReadGroups -I ${out_dir}/${patient_nr}.bam -O ${out_dir}/${patient_nr}_RG_added.bam --RGID 1 --RGLB lib1 --RGPL illumina --RGPU unit1 --RGSM 20
+log "Finished AddOrReplaceReadGroups"
+
+# Sort BAM
+log "Starting BAM sorting"
+module purge
+module load chpc/BIOMODULES
+module load samtools/1.20
+samtools sort -O bam -o ${out_dir}/${patient_nr}_sorted.bam -T ${out_dir}/${patient_nr}_temp ${out_dir}/${patient_nr}_RG_added.bam
+log "Finished BAM sorting"
+
+# Index BAM
+log "Starting BAM indexing"
+module purge
+module load chpc/BIOMODULES
+module load samtools/1.20
+samtools index ${out_dir}/${patient_nr}_sorted.bam
+log "Finished BAM indexing"
+
+# Validate SAM
+log "Starting SAM validation"
+module purge
+module load chpc/BIOMODULES
+module load gatk/4.6.0.0
+gatk ValidateSamFile -I ${out_dir}/${patient_nr}_sorted.bam -M SUMMARY
+log "Finished SAM validation"
+
+# Haplotype Caller
+log "Starting HaplotypeCaller"
+module purge
+module load chpc/BIOMODULES
+module load gatk/4.6.0.0
+gatk HaplotypeCaller -I ${out_dir}/${patient_nr}_sorted.bam -R hg38.fa -O ${out_dir}/${patient_nr}_raw.vcf --native-pair-hmm-threads 24
+log "Finished HaplotypeCaller"
+
+# Extract SNPs
+log "Starting SNP extraction"
+module purge
+module load chpc/BIOMODULES
+module load gatk/4.6.0.0
+gatk SelectVariants -V ${out_dir}/${patient_nr}_raw.vcf -R hg38.fa -select-type SNP -O ${out_dir}/${patient_nr}_1_SNPS_raw.vcf
+log "Finished SNP extraction"
+
+# Filter SNPs
+log "Starting SNP filtration"
+module purge
+module load chpc/BIOMODULES
+module load gatk/4.2.6.1
+gatk VariantFiltration -R hg38.fa -V ${out_dir}/${patient_nr}_1_SNPS_raw.vcf -O ${out_dir}/${patient_nr}_SNPS_final.vcf --filter "QD < 2.0" --filter-name "QD2" --filter "QUAL < 30.0" --filter-name "QUAL30" --filter "SOR > 3.0" --filter-name "SOR3" --filter "FS > 60.0" --filter-name "FS60" --filter "MQ < 40.0" --filter-name "MQ40" --filter "MQRankSum < -12.5" --filter-name "MQRankSum-12.5" --filter "ReadPosRankSum < -8.0" --filter-name "ReadPosRankSum-8"
+log "Finished SNP filtration"
+
+# Extract Indels
+log "Starting INDEL extraction"
+module purge
+module load chpc/BIOMODULES
+module load gatk/4.6.0.0
+gatk SelectVariants -V ${out_dir}/${patient_nr}_raw.vcf -R hg38.fa -select-type INDEL -O ${out_dir}/${patient_nr}_INDELs_raw.vcf
+log "Finished INDEL extraction"
+
+# Filter Indels
+log "Starting INDEL filtration"
+module purge
+module load chpc/BIOMODULES
+module load gatk/4.2.6.1
+gatk VariantFiltration -V ${out_dir}/${patient_nr}_INDELs_raw.vcf -R hg38.fa -O ${out_dir}/${patient_nr}_INDELs_final.vcf --filter "QD < 2.0" --filter-name "QD2" --filter "QUAL < 30.0" --filter-name "QUAL30" --filter "FS > 200.0" --filter-name "FS200" --filter "ReadPosRankSum < -20.0" --filter-name "ReadPosRankSum-20"
+log "Finished INDEL filtration"
+
+# Merge VCFs
+log "Starting VCF merge"
+module purge
+module load chpc/BIOMODULES
+module load gatk/4.6.0.0
+gatk MergeVcfs -I ${out_dir}/${patient_nr}_SNPS_final.vcf -I ${out_dir}/${patient_nr}_INDELs_final.vcf -O ${out_dir}/${patient_nr}.vcf
+log "Finished VCF merge"
+
