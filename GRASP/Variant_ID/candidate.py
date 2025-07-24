@@ -21,9 +21,17 @@ class CandidateIdentifier:
 
         # Threshold for selecting potential candidate variants
         threshold = 0.3
+        candidate_categories = {
+            'PATHOGENIC',
+            'LIKELY_PATHOGENIC',
+            'POSSIBLY_PATHOGENIC_MODERATE'
+        }
 
         candidates = []
         for classification in classifications:
+            if classification not in candidate_categories:
+                continue  # Skip anything not in the allowed list
+            
             combined_file = os.path.join("variant_classifications/all_cohorts", f"combined_cohorts_{classification}_gene_nucleotide.csv")
             if not os.path.exists(combined_file):
                 continue
