@@ -4,51 +4,38 @@ class Cleaner:
     def __init__(self, logger):
         self.logger = logger
 
-    def clean_franklin(self, input_default, input_utr, output_file):
+    def clean_franklin(self, input_file, output_file):
         """
-        Cleans and merges two Franklin input CSV files by removing unnecessary columns
-        and duplicate rows. Writes the cleaned data to an output CSV file.
+        Cleans a Franklin variant CSV file by keeping only relevant columns
+        and removing unnecessary quotation marks. Writes the cleaned data to a new CSV.
 
         Parameters:
-            input_default (str): Path to the first input CSV file (default variants).
-            input_utr (str): Path to the second input CSV file (UTR variants).
-            output_file (str): Path to save the cleaned and merged output CSV file.
+            input_file (str): Path to the input CSV file.
+            output_file (str): Path to save the cleaned output CSV file.
 
         Returns:
             None: Writes the cleaned data to the specified output file.
         """
 
         # Columns to keep in the output file for easier analysis
-        columns_to_keep = ["Gene", "Nucleotide", "Genoox_Classification", "Zygosity", "Inheritance_Model"]
-        merged_rows = []
+        columns_to_keep = ["Gene", "Nucleotide", "Genoox Classification", "Zygosity"]
 
-        # Read and merge rows from both default and UTR variant files
-        with open(input_default, 'r', encoding='utf-8') as infile1, open(input_utr, 'r', encoding='utf-8') as infile2:
-            reader1, reader2 = csv.DictReader(infile1), csv.DictReader(infile2)
-            merged_rows.extend(reader1)
-            merged_rows.extend(reader2)
+        cleaned_rows = []
 
-        # Write cleaned, merged rows to output CSV
+        with open(input_file, 'r', encoding='utf-8') as infile:
+            reader = csv.DictReader(infile)
+            for row in reader:
+                cleaned_row = {}
+                for col in columns_to_keep:
+                    if col in row:
+                        raw_value = row[col]
+                        value = raw_value.replace('""', '').strip('"') if raw_value else ''
+                        cleaned_row[col] = value
+                cleaned_rows.append(cleaned_row)
+
         with open(output_file, 'w', newline='', encoding='utf-8') as outfile:
             writer = csv.DictWriter(outfile, fieldnames=columns_to_keep)
             writer.writeheader()
-
-            seen_entries, duplicates = set(), []
-
-            # Filter duplicates by unique (Gene, Nucleotide) combination
-            for row in merged_rows:
-                uid = (row["Gene"], row["Nucleotide"])
-                if uid in seen_entries:
-                    duplicates.append(row)
-                else:
-                    seen_entries.add(uid)
-                    cleaned_row = {k: row[k].replace('""', '').strip('"') for k in columns_to_keep}
-                    writer.writerow(cleaned_row)
-
-        # Log duplicate entries (if any)
-        if duplicates:
-            self.logger.warning(f"Duplicate entries found in {output_file}. Skipping duplicates...")
-        else:
-            self.logger.info(f"{output_file}: No duplicates found.")
+            writer.writerows(cleaned_rows)
 
         self.logger.info(f"Cleaning complete for {output_file}.")

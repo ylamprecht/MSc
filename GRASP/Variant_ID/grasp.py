@@ -48,21 +48,21 @@ if __name__ == "__main__":
             logger.warning(f"No valid samples in {infolder}.")
             continue
 
-        # Clean and merge both input CSVs for each sample
+        # Clean each sample file
         for sample in samples:
-            f_default = os.path.join(infolder, f"{sample}_single_snp_variants.csv")
-            f_utr = os.path.join(infolder, f"{sample}_single_snp_variants (1).csv")
+            f_input = os.path.join(infolder, f"{sample}_single_snp_variants.csv")
             f_out = os.path.join(outfolder, f"{sample}.csv")
-            cleaner.clean_franklin(f_default, f_utr, f_out)
+            cleaner.clean_franklin(f_input, f_out)
 
         # Count variants after cleaning, grouped by classification
         counter.count_variants(outfolder)
 
     # Define variant classifications of interest
     classifications = [
-        "BENIGN", "LIKELY_BENIGN", "LIKELY_PATHOGENIC", "PATHOGENIC",
-        "POSSIBLY_BENIGN", "POSSIBLY_PATHOGENIC_LOW", "POSSIBLY_PATHOGENIC_MODERATE", "UNCERTAIN_SIGNIFICANCE"
+        "LIKELY_PATHOGENIC", "PATHOGENIC",
+        "POSSIBLY_PATHOGENIC_LOW", "POSSIBLY_PATHOGENIC_MODERATE", "UNCERTAIN_SIGNIFICANCE"
     ]
+
     # Cohort names for combining data
     cohorts = [f'Cohort_{i}' for i in range(1, 6)]
     # Total sample counts for each cohort (used to calculate proportions)

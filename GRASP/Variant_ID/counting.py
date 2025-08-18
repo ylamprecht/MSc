@@ -23,9 +23,7 @@ class Counter:
 
         # Variant classifications of interest
         classifications = [
-            'PATHOGENIC', 'LIKELY_PATHOGENIC', 'UNCERTAIN_SIGNIFICANCE',
-            'POSSIBLY_PATHOGENIC_LOW', 'POSSIBLY_PATHOGENIC_MODERATE',
-            'POSSIBLY_BENIGN', 'LIKELY_BENIGN', 'BENIGN'
+            'PATHOGENIC', 'LIKELY_PATHOGENIC', 'POSSIBLY_PATHOGENIC_MODERATE', 'POSSIBLY_PATHOGENIC_LOW', 'UNCERTAIN_SIGNIFICANCE'
         ]
 
         gene_nuc_data = {cls: defaultdict(list) for cls in classifications}
@@ -39,7 +37,7 @@ class Counter:
                     reader = csv.DictReader(f)
                     for row in reader:
                         gene, nuc = row['Gene'], row['Nucleotide']
-                        classification = row['Genoox_Classification']
+                        classification = row['Genoox Classification']
                         gene_nuc = f"{gene}_{nuc}"
 
                         if classification in gene_nuc_data:
