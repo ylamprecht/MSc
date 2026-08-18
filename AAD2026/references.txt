@@ -1,1 +1,8 @@
-
+COVID-19 Host Genetics Initiative (2023) “A second update on mapping the human genetic architecture of COVID-19.,” Nature, 621(7977), pp. E7–E26. doi:10.1038/s41586-023-06355-3.
+Feikin, D.R. et al. (2022) “Duration of effectiveness of vaccines against SARS-CoV-2 infection and COVID-19 disease: results of a systematic review and meta-regression.,” The Lancet, 399(10328), pp. 924–944. doi:10.1016/S0140-6736(22)00152-0.
+Ghosh, C. et al. (2022) “Involvement of Cdkal1 in the etiology of type 2 diabetes mellitus and microvascular diabetic complications: a review.,” Journal of diabetes and metabolic disorders, 21(1), pp. 991–1001. doi:10.1007/s40200-021-00953-6.
+Jamaly, S. et al. (2021) “Complement activation and increased expression of Syk, mucin-1 and CaMK4 in kidneys of patients with COVID-19.,” Clinical Immunology, 229, p. 108795. doi:10.1016/j.clim.2021.108795.
+Lin, D.-Y. et al. (2024) “Durability of XBB.1.5 Vaccines against Omicron Subvariants.,” The New England Journal of Medicine, 390(22), pp. 2124–2127. doi:10.1056/NEJMc2402779.
+Li, Y. et al. (2024) “Hub genes identification and validation of ferroptosis in SARS-CoV-2 induced ARDS: perspective from transcriptome analysis.,” Frontiers in Immunology, 15, p. 1407924. doi:10.3389/fimmu.2024.1407924.
+Petersen, D.C. et al. (2022) “African Genetic Representation in the Context of SARS-CoV-2 Infection and COVID-19 Severity.,” Frontiers in genetics, 13, p. 909117. doi:10.3389/fgene.2022.909117.
+Tzankov, A. et al. (2022) “Increase in Chondroitin Sulfate and Decline in Arylsulfatase B May Contribute to Pathophysiology of COVID-19 Respiratory Failure.,” Pathobiology : journal of immunopathology, molecular and cellular biology, 89(2), pp. 81–91. doi:10.1159/000519542.
