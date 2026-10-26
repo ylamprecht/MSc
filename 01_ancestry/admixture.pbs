@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#PBS -N Admixture
+#PBS -l select=1:ncpus=24:mpiprocs=24
+#PBS -P HEAL1360
+#PBS -l walltime=12:00:00
+#PBS -q smp
+#PBS -o /mnt/lustre/users/ylamprecht/Ancestry_inference/UV-SD/admixture.out
+#PBS -e /mnt/lustre/users/ylamprecht/Ancestry_inference/UV-SD/admixture.err 
+#PBS -M ylamprecht@sun.ac.za
+#PBS -m abe
+
+cd /mnt/lustre/users/ylamprecht/Ancestry_inference/UV-SD
+
+module load chpc/BIOMODULES
+module load plink/2.00a
+module load plink/1.90
+module load admixture/1.3.0
+
+
+#Run ADMIXTURE on merged data for K{2..10}
+for K in {2..5}; do admixture --cv UVSD_Ancestry_final.bed ${K} -j4 | tee logadmixture_run${K}.out; done 
+
+
+#Get the cross-validation error estimate from the generated files
+grep -h CV logadmixture_run*.out |sort -R > CV_error_UV-SD.txt

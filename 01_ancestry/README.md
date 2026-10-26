@@ -1,7 +1,7 @@
 # Ancestry Inference
 
 Global ancestry inference for the study cohorts, using a reference panel of
-1000 Genomes, Nama and Malay populations.
+European, East Asian, West African, KhoeSan and Malay populations.
 
 Ancestry was inferred separately for each cohort (UV-HE, UV-MD, UV-SD, V-MD)
 to maintain a balanced ratio of target to reference individuals.
