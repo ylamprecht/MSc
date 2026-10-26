@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#PBS -N prep_genome
+#PBS -l walltime=48:00:00
+#PBS -l select=1:ncpus=24:mpiprocs=24
+#PBS -P HEAL1360
+#PBS -q smp
+#PBS -e /mnt/lustre/users/ylamprecht/Hons_project/prep_genome.err
+#PBS -o /mnt/lustre/users/ylamprecht/Hons_project/prep_genome.out
+#PBS -M 24952818@sun.ac.za
+#PBS -m abe
+
+cd /mnt/lustre/users/ylamprecht/Hons_project
+
+# Index the reference genome
+module purge
+module load chpc/BIOMODULES
+module load bwa/0.7.17
+bwa index -a bwtsw -p hg38idx hg38.fa
+
+# Create a sequence dictionary
+module purge
+module load chpc/BIOMODULES
+module load gatk/4.6.0.0
+gatk CreateSequenceDictionary -R hg38.fa -O hg38.dict
+
+# Generate a .fai index file
+module purge
+module load chpc/BIOMODULES
+module load samtools/1.20
+samtools faidx hg38.fa

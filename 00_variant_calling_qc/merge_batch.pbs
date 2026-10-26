@@ -1,0 +1,50 @@
+#!/bin/bash
+#PBS -N merge_VCFs
+#PBS -l walltime=24:00:00
+#PBS -l select=1:ncpus=4
+#PBS -e merge_VCFs.err
+#PBS -o merge_VCFs.out
+#PBS -M ylamprecht@sun.ac.za
+#PBS -m abe
+
+# Exit immediately if a step exits with a non-zero status
+set -e
+
+cd $PBS_O_WORKDIR
+
+module purge
+module load app/bcftools/1.19
+
+# Collect all vcf.gz files into a list
+find UV-MD UV-SD UV-HE V-MD -name "*.vcf.gz" | sort > vcf_list.txt
+echo "Files to merge:"
+cat vcf_list.txt
+
+# Merge all VCF files
+echo "Starting merge..."
+bcftools merge -0 \
+    --file-list vcf_list.txt \
+    --output merged.vcf.gz \
+    --output-type z \
+    --threads 4
+
+# Index the merged output
+bcftools index merged.vcf.gz
+
+echo "Merge complete: merged.vcf.gz"
+
+# Normalise: split multi-allelic sites into biallelic records
+echo "Normalising..."
+bcftools norm \
+    -m -any \
+    --output merged_norm.vcf.gz \
+    --output-type z \
+    --threads 4 \
+    merged.vcf.gz
+
+# Index the normalised output
+bcftools index merged_norm.vcf.gz
+
+echo "Normalisation complete: merged_norm.vcf.gz"
+echo "Samples in normalised file:"
+bcftools query -l merged_norm.vcf.gz
