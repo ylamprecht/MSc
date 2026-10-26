@@ -15,16 +15,6 @@ Performed using `merge_batch.pbs` in `00_variant_calling_qc/`. Per-sample VCFs
 were compressed, renamed, indexed, merged and normalised to split multi-allelic
 sites into biallelic records.
 
-    Note: all samples were named "20" in their VCF headers and had to be
-    renamed before merging. To check sample names:
-
-        for file in *.vcf.gz; do echo "$file:"; bcftools query -l "$file"; done
-
-    plink2 --vcf merged_norm.vcf.gz \
-           --allow-extra-chr \
-           --make-bed \
-           --out Target
-
 ## 2. Genotype QC
 
     plink2 --bfile 1000G_Nama_Malay_reference \
