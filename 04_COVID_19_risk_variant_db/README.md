@@ -2,7 +2,7 @@
 
 A curated SQLite database of host genetic variants reported as associated with
 COVID-19 outcomes, and the comparison of those variants with the association
-results from this cohort.
+results from this study.
 
 Adapted from the COHG-SA database (Barmania et al., 2022) and extended by a
 systematic PubMed search. Variants are keyed on rsID and linked to the papers
@@ -66,4 +66,4 @@ Of the 377 variants, 342 were present in the cohort association results, and
 concordant.
 
 The database and the comparison together establish which published COVID-19
-risk variants replicate directionally in this admixed South African cohort.
+risk variants replicate directionally in this study.
