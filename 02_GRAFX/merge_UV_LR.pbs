@@ -1,0 +1,38 @@
+#!/bin/bash
+#PBS -N merge_VCFs
+#PBS -l walltime=12:00:00
+#PBS -l select=1:ncpus=4
+#PBS -e merge_VCFs.err
+#PBS -o merge_VCFs.out
+#PBS -M ylamprecht@sun.ac.za
+#PBS -m abe
+ 
+set -eo pipefail
+cd $PBS_O_WORKDIR
+ 
+module purge
+module load app/bcftools/1.19
+ 
+# Index any files lacking an index
+for vcf in UV-MD/*.vcf.gz UV-SD/*.vcf.gz UV-HE/*.vcf.gz; do
+    [ -f "${vcf}.csi" ] || [ -f "${vcf}.tbi" ] || bcftools index "${vcf}"
+done
+ 
+find UV-MD UV-SD UV-HE -name "*.vcf.gz" | sort > vcf_list.txt
+ 
+# Merge and keep only biallelic sites
+bcftools merge -0 --file-list vcf_list.txt --output-type u --threads 4 \
+  | bcftools view -M2 --output-type z --output merged_biallelic.vcf.gz --threads 4
+bcftools index merged_biallelic.vcf.gz
+ 
+# Split per chromosome
+mkdir -p per_chr
+wanted=$(bcftools index --stats merged_biallelic.vcf.gz | cut -f1 \
+         | grep -E '^(chr)?([1-9]|1[0-9]|2[0-2]|X)$')
+ 
+for chr in ${wanted}; do
+    bcftools view -r "${chr}" --threads 4 \
+        --output-type z --output "per_chr/${chr}.vcf.gz" \
+        merged_biallelic.vcf.gz
+    bcftools index "per_chr/${chr}.vcf.gz"
+done
