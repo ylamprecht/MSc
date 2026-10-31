@@ -51,7 +51,7 @@ ADMIXTURE. `ASIAN` is the reference category and is not fitted. Sex is coded
 | `meta_data.txt` | all |
 | `meta_males.txt` | males |
 | `meta_females.txt` | females |
-| `PRF_meta_data.txt` | PRF substudy |
+| `BETA_meta_data.txt` | TBH Beta wave substudy |
 
 ## 1. Input preparation
 
@@ -224,11 +224,7 @@ Run in this order. `pooled_bh_correction.R` rewrites `p_BH` in place in all 23
 input files with no backup, and `plot_results.R` reads that column.
 
 Outputs are `top100_hits_pooled_BH.tsv`, `plots/qq_plot.png` and
-`plots/manhattan_plot.png`. The Manhattan plot covers the autosomes only.
-
-If the plot text does not render as Arial, install `extrafont`, run
-`font_import()` once, and set `BASE_FAMILY <- "Arial"` at the top of
-`plot_results.R`.
+`plots/manhattan_plot.png`.
 
 ## 5. Annotation
 
@@ -264,7 +260,7 @@ with Franklin (https://franklin.genoox.com/clinical-db/home) and with VIPR
 
 ## 6. Variant diagnostics
 
-Used in the PRF substudy to establish whether an implausible odds ratio came
+Used in the TBH Beta wave substudy to establish whether an implausible odds ratio came
 from a covariate, from the genotype vector itself, or from quasi-separation.
 Set `SNP` and `gt_file` at the top of the script, then:
 
@@ -272,5 +268,5 @@ Set `SNP` and `gt_file` at the top of the script, then:
 Rscript diagnose_variant.R
 ```
 
-Together these steps produce the genome-wide association results, the pooled
+Together these steps produce the genetic association results, the pooled
 FDR-corrected top 100, and their functional annotation.

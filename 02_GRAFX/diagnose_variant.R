@@ -14,7 +14,7 @@ library(logistf)
 SNP          <- "chr1:48753712:G:A"
 gt_file      <- "chr1_gt.tsv"
 samples_file <- "samples.txt"
-meta_file    <- "PRF_meta_data.txt"
+meta_file    <- "BETA_meta_data.txt"
 covariates   <- c("age", "sex", "GBR", "YRI", "NAMA")
 
 # Samples and metadata
